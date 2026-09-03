@@ -1,0 +1,26 @@
+{
+  "name": "media-timecode-field",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Media Chrome control: type a timecode to seek.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run tests/parse.test.ts"
+  },
+  "peerDependencies": {
+    "media-chrome": "^4"
+  },
+  "devDependencies": {
+    "media-chrome": "^4.15.1",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "vitest": "^3.0.5"
+  }
+}

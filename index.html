@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>media-timecode-field</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0e1014;
+        --text: #e8eaed;
+        --muted: #8b909a;
+        --line: #2a2e36;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font: 16px/1.5 ui-sans-serif, system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      main {
+        max-width: 840px;
+        margin: 0 auto;
+        padding: 48px 20px 80px;
+      }
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin: 0 0 8px;
+      }
+      p { color: var(--muted); margin: 0 0 28px; max-width: 42rem; }
+      kbd {
+        font: 12px/1.2 ui-monospace, monospace;
+        border: 1px solid var(--line);
+        padding: 2px 6px;
+        border-radius: 4px;
+        color: var(--text);
+      }
+      media-controller {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #000;
+      }
+      video { width: 100%; height: 100%; }
+      .hint {
+        margin-top: 16px;
+        font-size: 0.875rem;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>media-timecode-field</h1>
+      <p>
+        Click the time, type <kbd>1:17</kbd> or <kbd>90</kbd>, press Enter.
+        The bar is still a slider. This field is for when you already know where to go.
+      </p>
+      <media-controller>
+        <video
+          slot="media"
+          src="https://stream.mux.com/A3VXy02VoUinw01pwyomEO3bHnG4P32xzV7u1j1FSzjNg/high.mp4"
+          playsinline
+          muted
+          crossorigin="anonymous"
+        ></video>
+        <media-control-bar>
+          <media-play-button></media-play-button>
+          <media-seek-backward-button></media-seek-backward-button>
+          <media-seek-forward-button></media-seek-forward-button>
+          <media-timecode-field></media-timecode-field>
+          <media-time-range></media-time-range>
+          <media-mute-button></media-mute-button>
+          <media-volume-range></media-volume-range>
+          <media-fullscreen-button></media-fullscreen-button>
+        </media-control-bar>
+      </media-controller>
+      <p class="hint">
+        <kbd>Enter</kbd> seek · <kbd>Esc</kbd> cancel · <kbd>↑</kbd><kbd>↓</kbd> ±1s ·
+        Shift+arrows ±10s
+      </p>
+    </main>
+    <script type="module" src="/demo/src/main.ts"></script>
+  </body>
+</html>
