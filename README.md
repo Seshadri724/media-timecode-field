@@ -4,7 +4,7 @@ Type a time. The video goes there.
 
 A Media Chrome control: `<media-timecode-field>` sits next to `<media-time-display>` (a label) and `<media-time-range>` (a slider). This one is an accessible text field that seeks.
 
-**Live demo** (after GitHub Pages deploys): type `1:17` and press Enter — `https://<your-github-user>.github.io/media-timecode-field/`
+**Live demo** (after GitHub Pages deploys): type `1:17` and press Enter — https://seshadri724.github.io/media-timecode-field/
 
 ```html
 <media-controller>
