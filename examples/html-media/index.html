@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML5 Media Example — media-timecode-field</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0d1117;
+        --card: #161b22;
+        --border: #30363d;
+        --text: #c9d1d9;
+      }
+      body {
+        margin: 0;
+        padding: 40px 20px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .container {
+        max-width: 720px;
+        width: 100%;
+      }
+      video {
+        width: 100%;
+        border-radius: 8px;
+        background: #000;
+        border: 1px solid var(--border);
+      }
+      .controls-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 14px;
+        padding: 12px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+      kbd {
+        font-family: ui-monospace, monospace;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.85em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Plain HTML5 &lt;video&gt; Example</h1>
+      <p>
+        Controls any standard HTML5 media element via the <kbd>media="id"</kbd> attribute. No Media Chrome or framework required.
+      </p>
+
+      <video
+        id="player"
+        src="https://images-assets.nasa.gov/video/301_BlackHoles/301_BlackHoles~medium.mp4"
+        controls
+        playsinline
+      ></video>
+
+      <div class="controls-bar">
+        <span>Seek time:</span>
+        <media-timecode-field media="player"></media-timecode-field>
+        <span style="font-size: 0.85rem; color: #8b949e">
+          (Type <kbd>1:17</kbd>, <kbd>+30s</kbd>, or <kbd>50%</kbd> and press Enter)
+        </span>
+      </div>
+    </div>
+
+    <script type="module">
+      import '../../src/media-timecode-field.ts';
+    </script>
+  </body>
+</html>

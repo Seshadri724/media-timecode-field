@@ -1,23 +1,60 @@
 {
   "name": "media-timecode-field",
-  "version": "0.1.0",
-  "private": true,
-  "description": "Media Chrome control: type a timecode to seek.",
+  "version": "0.2.0",
+  "description": "Accessible, keyboard-first type-to-seek web component for HTML5 media and Media Chrome.",
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
   },
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/events.d.ts",
+    "dist/media-timecode-field.d.ts",
+    "dist/parse.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build:demo": "vite build",
+    "build:lib": "vite build --config vite.config.lib.ts && tsc -p tsconfig.build.json",
+    "build": "npm run build:demo && npm run build:lib",
     "preview": "vite preview",
-    "test": "vitest run tests/parse.test.ts"
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Seshadri724/media-timecode-field.git"
+  },
+  "keywords": [
+    "media-chrome",
+    "video",
+    "timecode",
+    "web-components",
+    "custom-elements",
+    "html5-video",
+    "seek"
+  ],
+  "author": "Seshadri",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Seshadri724/media-timecode-field/issues"
+  },
+  "homepage": "https://seshadri724.github.io/media-timecode-field/",
   "peerDependencies": {
     "media-chrome": "^4"
   },
   "devDependencies": {
+    "happy-dom": "^17.4.3",
     "media-chrome": "^4.15.1",
     "typescript": "^5.7.3",
     "vite": "^6.1.0",

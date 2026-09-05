@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Media Chrome Example — media-timecode-field</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0d1117;
+        --border: #30363d;
+        --text: #c9d1d9;
+      }
+      body {
+        margin: 0;
+        padding: 40px 20px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .container {
+        max-width: 720px;
+        width: 100%;
+      }
+      media-controller {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #000;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+      video {
+        width: 100%;
+        height: 100%;
+      }
+      kbd {
+        font-family: ui-monospace, monospace;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.85em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Media Chrome Integration Example</h1>
+      <p>
+        Functions natively as a Media Chrome state receiver inside <kbd>&lt;media-control-bar&gt;</kbd>, inheriting CSS variables and dispatching <kbd>mediaseekrequest</kbd>.
+      </p>
+
+      <media-controller>
+        <video
+          slot="media"
+          src="https://images-assets.nasa.gov/video/301_BlackHoles/301_BlackHoles~medium.mp4"
+          playsinline
+        ></video>
+        <media-control-bar>
+          <media-play-button></media-play-button>
+          <media-seek-backward-button></media-seek-backward-button>
+          <media-seek-forward-button></media-seek-forward-button>
+          <media-timecode-field></media-timecode-field>
+          <media-time-range></media-time-range>
+          <media-mute-button></media-mute-button>
+          <media-volume-range></media-volume-range>
+          <media-fullscreen-button></media-fullscreen-button>
+        </media-control-bar>
+      </media-controller>
+    </div>
+
+    <script type="module">
+      import 'media-chrome';
+      import '../../src/media-timecode-field.ts';
+    </script>
+  </body>
+</html>

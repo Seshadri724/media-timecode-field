@@ -41,25 +41,47 @@ import 'media-timecode-field';
 
 ## Why this exists
 
-The slider is a map. It is the wrong tool when you already know `1:17:42`. This accepts `90`, `1:30`, or `01:02:45`, clamps to duration, then seeks.
+The slider is a map. It is the wrong tool when you already know `1:17:42` or want to jump forward `+30s`. This element accepts exact timecodes, relative deltas, and percentages, clamps to duration, and seeks.
 
-## Keyboard
+## Supported Expressions
 
-| Key | Action |
+| Expression | Example | Behavior |
+| --- | --- | --- |
+| **Exact timecode** | `90`, `1:30`, `01:02:45` | Seeks directly to timestamp |
+| **Relative forward** | `+15`, `+30s`, `+1m`, `+1:30` | Jumps forward relative to current playhead |
+| **Relative backward** | `-15`, `-30s`, `-1m`, `-1:15` | Jumps backward relative to current playhead |
+| **Percentage** | `50%`, `25%`, `75%` | Seeks to percentage of video duration |
+| **Keywords** | `start`, `end`, `half` | Seeks to boundaries or halfway point |
+
+## Keyboard & Actions
+
+| Key / Action | Behavior |
 | --- | --- |
-| Click / Tab | Edit the current time |
-| Enter | Seek and leave edit |
-| Escape | Cancel |
-| ↑ / ↓ | ±1 second (Shift: ±10) |
+| Click / Tab | Edit time or expression |
+| Enter | Seek and exit edit |
+| Shift + Enter | Seek and dispatch `mediatimestampmark` review pin event |
+| Escape | Cancel and revert to playback time |
+| ↑ / ↓ | Step ±1 second (Shift: ±10s) |
+| 🔗 Copy Icon | Copies deep-link URL (`#t=01:17`) with visual feedback |
+
+## Events
+
+| Event | Target | Detail | Meaning |
+| --- | --- | --- | --- |
+| `mediaseekrequest` | Parent / Controller | `time` (seconds) | Dispatched when seeking |
+| `mediatimestampmark` | Component | `{ time, formatted, rawInput }` | Dispatched on Shift+Enter for review/annotation tools |
+| `mediatimestampcopied` | Component | `{ time, formatted, url }` | Dispatched when timestamp link is copied |
 
 ## Attributes
 
 | Attribute | Default | Meaning |
 | --- | --- | --- |
-| `media` | — | `id` of a `<video>` or `<audio>` (HTML5 path) |
-| `format` | `auto` | `auto` → `hh:mm:ss` if duration ≥ 1 hour, else `mm:ss` |
-| `disabled` | off | Not editable |
-| `mediacontroller` | — | Media Chrome controller `id` when the field is not nested |
+| `media` | — | `id` of an HTML5 `<video>` or `<audio>` element |
+| `format` | `auto` | `auto` → `hh:mm:ss` if duration ≥ 1 hr, else `mm:ss` |
+| `chapters` | — | JSON array of `[{"time": 0, "label": "Intro"}]` for native autocomplete |
+| `no-copy` | off | Hide the copy deep-link button |
+| `disabled` | off | Disable field |
+| `mediacontroller` | — | Media Chrome controller `id` when outside controller |
 
 ## Not this
 

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custom Player Example — media-timecode-field</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0d1117;
+        --card: #161b22;
+        --border: #30363d;
+        --text: #c9d1d9;
+        --accent: #58a6ff;
+      }
+      body {
+        margin: 0;
+        padding: 40px 20px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .container {
+        max-width: 720px;
+        width: 100%;
+      }
+      video {
+        width: 100%;
+        border-radius: 8px;
+        background: #000;
+        border: 1px solid var(--border);
+      }
+      .custom-hud {
+        margin-top: 14px;
+        padding: 16px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      button {
+        background: #21262d;
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-family: ui-monospace, monospace;
+      }
+      button:hover {
+        background: #30363d;
+      }
+      .log-console {
+        background: #090d13;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 10px;
+        font-family: ui-monospace, monospace;
+        font-size: 0.8rem;
+        height: 100px;
+        overflow-y: auto;
+        color: #7ee787;
+      }
+      kbd {
+        font-family: ui-monospace, monospace;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.85em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Custom Player / Programmatic API Example</h1>
+      <p>
+        Shows headless integration using the pure <kbd>seekMedia()</kbd> helper function and listening to custom events.
+      </p>
+
+      <video
+        id="custom-video"
+        src="https://images-assets.nasa.gov/video/301_BlackHoles/301_BlackHoles~medium.mp4"
+        controls
+        playsinline
+      ></video>
+
+      <div class="custom-hud">
+        <div class="row">
+          <span>Component:</span>
+          <media-timecode-field id="custom-field" media="custom-video"></media-timecode-field>
+          <button type="button" id="btn-30s">Programmatic seekMedia(video, '+30s')</button>
+          <button type="button" id="btn-half">Programmatic seekMedia(video, '50%')</button>
+        </div>
+
+        <div>
+          <span style="font-size: 0.85rem; color: #8b949e">Event Log:</span>
+          <div class="log-console" id="log">Waiting for user actions...</div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import '../../src/media-timecode-field.ts';
+      import { seekMedia } from '../../src/parse.ts';
+      import {
+        MEDIA_SEEK_REQUEST,
+        MEDIA_TIMESTAMP_MARK,
+        MEDIA_TIMESTAMP_COPIED,
+      } from '../../src/events.ts';
+
+      const video = document.getElementById('custom-video');
+      const field = document.getElementById('custom-field');
+      const log = document.getElementById('log');
+
+      function appendLog(text) {
+        const time = new Date().toLocaleTimeString();
+        log.innerHTML = `[${time}] ${text}<br>` + log.innerHTML;
+      }
+
+      document.getElementById('btn-30s').addEventListener('click', () => {
+        const target = seekMedia(video, '+30s');
+        appendLog(`Programmatic seekMedia(+30s) -> ${target?.toFixed(1)}s`);
+      });
+
+      document.getElementById('btn-half').addEventListener('click', () => {
+        const target = seekMedia(video, '50%');
+        appendLog(`Programmatic seekMedia(50%) -> ${target?.toFixed(1)}s`);
+      });
+
+      field.addEventListener(MEDIA_SEEK_REQUEST, (e) => {
+        appendLog(`mediaseekrequest dispatched: ${e.detail}s`);
+      });
+
+      field.addEventListener(MEDIA_TIMESTAMP_MARK, (e) => {
+        appendLog(`mediatimestampmark (Shift+Enter): ${e.detail.formatted}`);
+      });
+
+      field.addEventListener(MEDIA_TIMESTAMP_COPIED, (e) => {
+        appendLog(`mediatimestampcopied: ${e.detail.url}`);
+      });
+    </script>
+  </body>
+</html>

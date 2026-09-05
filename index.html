@@ -3,41 +3,66 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>media-timecode-field</title>
+    <title>media-timecode-field — Precision Timecode & Relative Seek</title>
     <style>
       :root {
         color-scheme: dark;
-        --bg: #0e1014;
-        --text: #e8eaed;
-        --muted: #8b909a;
-        --line: #2a2e36;
+        --bg: #0b0d11;
+        --card-bg: #14171f;
+        --text: #f0f3f6;
+        --muted: #8c93a0;
+        --line: #222733;
+        --accent: #388bfd;
+        --accent-glow: rgba(56, 139, 253, 0.15);
+        --tag-bg: #1c212c;
       }
       * { box-sizing: border-box; }
       body {
         margin: 0;
         min-height: 100vh;
-        font: 16px/1.5 ui-sans-serif, system-ui, sans-serif;
+        font: 15px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         background: var(--bg);
         color: var(--text);
+        -webkit-font-smoothing: antialiased;
       }
       main {
-        max-width: 840px;
+        max-width: 880px;
         margin: 0 auto;
-        padding: 48px 20px 80px;
+        padding: 40px 20px 80px;
+      }
+      header {
+        margin-bottom: 28px;
       }
       h1 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        letter-spacing: -0.02em;
+        font-size: 1.75rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
         margin: 0 0 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
-      p { color: var(--muted); margin: 0 0 28px; max-width: 42rem; }
-      kbd {
-        font: 12px/1.2 ui-monospace, monospace;
+      .badge {
+        font-size: 0.75rem;
+        font-weight: 500;
+        background: var(--accent-glow);
+        color: var(--accent);
+        border: 1px solid rgba(56, 139, 253, 0.3);
+        padding: 2px 8px;
+        border-radius: 99px;
+      }
+      p.subtitle {
+        color: var(--muted);
+        margin: 0;
+        font-size: 1rem;
+        max-width: 44rem;
+      }
+      .player-wrapper {
+        border-radius: 12px;
+        overflow: hidden;
         border: 1px solid var(--line);
-        padding: 2px 6px;
-        border-radius: 4px;
-        color: var(--text);
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+        background: #000;
       }
       media-controller {
         display: block;
@@ -45,60 +70,268 @@
         aspect-ratio: 16 / 9;
         background: #000;
       }
-      video { width: 100%; height: 100%; }
-      .hint {
-        margin-top: 16px;
-        font-size: 0.875rem;
+      video { width: 100%; height: 100%; object-fit: contain; }
+      
+      .pill-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin: 16px 0 24px;
+        padding: 12px 16px;
+        background: var(--card-bg);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+      .pill-bar span {
+        font-size: 0.82rem;
         color: var(--muted);
+        font-weight: 500;
+        margin-right: 4px;
+      }
+      .quick-pill {
+        background: var(--tag-bg);
+        border: 1px solid var(--line);
+        color: var(--text);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.8rem;
+        padding: 4px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .quick-pill:hover {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+        transform: translateY(-1px);
+      }
+
+      .grid-sections {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 24px;
+      }
+      @media (max-width: 680px) {
+        .grid-sections { grid-template-columns: 1fr; }
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 20px;
+      }
+      .card h2 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin: 0 0 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .card p {
+        font-size: 0.88rem;
+        color: var(--muted);
+        margin: 0 0 14px;
+      }
+
+      kbd {
+        font: 11.5px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        border: 1px solid var(--line);
+        background: var(--bg);
+        padding: 2px 5px;
+        border-radius: 4px;
+        color: var(--text);
+      }
+
+      .pins-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 220px;
+        overflow-y: auto;
+      }
+      .pin-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--tag-bg);
+        border: 1px solid var(--line);
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background 0.15s ease;
+      }
+      .pin-item:hover {
+        border-color: var(--accent);
+        background: #232936;
+      }
+      .pin-time {
+        font-family: ui-monospace, monospace;
+        font-weight: 600;
+        color: var(--accent);
+        font-size: 0.88rem;
+      }
+      .pin-label {
+        font-size: 0.85rem;
+        color: var(--text);
+        margin-left: 10px;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .pin-empty {
+        color: var(--muted);
+        font-style: italic;
+        font-size: 0.85rem;
+        padding: 12px 0;
+        text-align: center;
+      }
+
+      .shortcuts-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.84rem;
+      }
+      .shortcuts-table td {
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .shortcuts-table td:last-child {
+        color: var(--muted);
+        text-align: right;
+      }
+
+      .standalone-section {
+        margin-top: 48px;
+        border-top: 1px solid var(--line);
+        padding-top: 36px;
       }
     </style>
   </head>
   <body>
     <main>
-      <h1>media-timecode-field</h1>
-      <p>
-        NASA ScienceCast on black holes (~4 min, public domain). Notes would say
-        “see <kbd>1:17</kbd>.” Type that, press Enter — don’t hunt the slider.
-      </p>
-      <media-controller>
-        <video
-          slot="media"
-          src="https://images-assets.nasa.gov/video/301_BlackHoles/301_BlackHoles~medium.mp4"
-          playsinline
-        ></video>
-        <media-control-bar>
-          <media-play-button></media-play-button>
-          <media-seek-backward-button></media-seek-backward-button>
-          <media-seek-forward-button></media-seek-forward-button>
-          <media-timecode-field></media-timecode-field>
-          <media-time-range></media-time-range>
-          <media-mute-button></media-mute-button>
-          <media-volume-range></media-volume-range>
-          <media-fullscreen-button></media-fullscreen-button>
-        </media-control-bar>
-      </media-controller>
-      <p class="hint">
-        <kbd>Enter</kbd> seek · <kbd>Esc</kbd> cancel · <kbd>↑</kbd><kbd>↓</kbd> ±1s ·
-        Shift+arrows ±10s
-        ·
-        <a href="https://images.nasa.gov/details/301_BlackHoles" style="color: inherit">NASA ScienceCasts: Shedding Light on Black Holes</a>
-      </p>
+      <header>
+        <h1>
+          media-timecode-field
+          <span class="badge">v0.2.0</span>
+        </h1>
+        <p class="subtitle">
+          Accessible, keyboard-first type-to-seek control for web video. Supports exact timecodes, relative offsets (<kbd>+30s</kbd>, <kbd>-1m</kbd>), percentages (<kbd>50%</kbd>), 1-click deep linking, and review annotation markers.
+        </p>
+      </header>
 
-      <h1 style="margin-top: 48px">Same field, plain HTML5 video</h1>
-      <p>
-        No Media Chrome. Point <kbd>media</kbd> at any <kbd>&lt;video&gt;</kbd> or <kbd>&lt;audio&gt;</kbd> you own.
-      </p>
-      <video
-        id="plain-video"
-        src="https://images-assets.nasa.gov/video/301_BlackHoles/301_BlackHoles~medium.mp4"
-        controls
-        playsinline
-        style="width: 100%; background: #000"
-      ></video>
-      <p class="hint" style="margin-top: 8px">
-        <media-timecode-field media="plain-video"></media-timecode-field>
-      </p>
+      <!-- Media Chrome Player with Chapters -->
+      <div class="player-wrapper">
+        <media-controller id="main-player">
+          <video
+            slot="media"
+            id="nasa-video"
+            src="https://images-assets.nasa.gov/video/301_BlackHoles/301_BlackHoles~medium.mp4"
+            playsinline
+          ></video>
+          <media-control-bar>
+            <media-play-button></media-play-button>
+            <media-seek-backward-button></media-seek-backward-button>
+            <media-seek-forward-button></media-seek-forward-button>
+            <media-timecode-field
+              id="chrome-field"
+              chapters='[{"time":0,"label":"00:00 - Introduction"},{"time":45,"label":"00:45 - What is a Black Hole?"},{"time":77,"label":"01:17 - Event Horizon"},{"time":140,"label":"02:20 - Supermassive Core"},{"time":210,"label":"03:30 - Summary"}]'
+            ></media-timecode-field>
+            <media-time-range></media-time-range>
+            <media-mute-button></media-mute-button>
+            <media-volume-range></media-volume-range>
+            <media-fullscreen-button></media-fullscreen-button>
+          </media-control-bar>
+        </media-controller>
+      </div>
+
+      <!-- Quick Test Expression Pills -->
+      <div class="pill-bar">
+        <span>Try relative seeking:</span>
+        <button type="button" class="quick-pill" data-expr="1:17">1:17</button>
+        <button type="button" class="quick-pill" data-expr="+30s">+30s</button>
+        <button type="button" class="quick-pill" data-expr="-15s">-15s</button>
+        <button type="button" class="quick-pill" data-expr="+1m">+1m</button>
+        <button type="button" class="quick-pill" data-expr="50%">50%</button>
+        <button type="button" class="quick-pill" data-expr="start">start</button>
+        <button type="button" class="quick-pill" data-expr="end">end</button>
+      </div>
+
+      <!-- Side-by-Side: Review Pins & Keyboard Shortcuts -->
+      <div class="grid-sections">
+        <!-- Interactive Review / Annotation Pins -->
+        <div class="card">
+          <h2>
+            Review Notes & Markers
+            <span class="badge" id="pin-count">0 pins</span>
+          </h2>
+          <p>
+            Press <kbd>Shift + Enter</kbd> in the timecode field to drop an instant timestamp review pin!
+          </p>
+          <div class="pins-list" id="pins-list">
+            <div class="pin-empty" id="pin-empty">No pins yet. Type a time and press Shift+Enter.</div>
+          </div>
+        </div>
+
+        <!-- Cheat Sheet -->
+        <div class="card">
+          <h2>Controls & Shortcuts</h2>
+          <table class="shortcuts-table">
+            <tbody>
+              <tr>
+                <td><kbd>Enter</kbd></td>
+                <td>Commit seek & exit edit</td>
+              </tr>
+              <tr>
+                <td><kbd>Shift + Enter</kbd></td>
+                <td>Seek + Drop Review Pin</td>
+              </tr>
+              <tr>
+                <td><kbd>Esc</kbd></td>
+                <td>Cancel and revert to playback time</td>
+              </tr>
+              <tr>
+                <td><kbd>↑</kbd> / <kbd>↓</kbd></td>
+                <td>Step ±1 second</td>
+              </tr>
+              <tr>
+                <td><kbd>Shift + ↑</kbd> / <kbd>↓</kbd></td>
+                <td>Step ±10 seconds</td>
+              </tr>
+              <tr>
+                <td>🔗 <strong>Copy Icon</strong></td>
+                <td>Copies deep-link URL (<code>#t=01:17</code>)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Plain HTML5 video demo -->
+      <div class="standalone-section">
+        <h2>Works with plain HTML5 video (no Media Chrome required)</h2>
+        <p class="subtitle" style="margin-bottom: 16px">
+          Set <kbd>media="video-id"</kbd> to control any standard <kbd>&lt;video&gt;</kbd> or <kbd>&lt;audio&gt;</kbd> tag.
+        </p>
+        <video
+          id="plain-video"
+          src="https://images-assets.nasa.gov/video/301_BlackHoles/301_BlackHoles~medium.mp4"
+          controls
+          playsinline
+          style="width: 100%; border-radius: 8px; background: #000; border: 1px solid var(--line)"
+        ></video>
+        <p style="margin-top: 12px; display: flex; align-items: center; gap: 8px">
+          <span style="color: var(--muted); font-size: 0.88rem">Dedicated field:</span>
+          <media-timecode-field media="plain-video"></media-timecode-field>
+        </p>
+      </div>
     </main>
+
     <script type="module" src="/demo/src/main.ts"></script>
   </body>
 </html>
+
