@@ -72,6 +72,7 @@ export class MediaTimecodeField extends HTMLElement {
     return [
       'disabled',
       'format',
+      'media',
       'mediacontroller',
       'mediacurrenttime',
       'mediaduration',
@@ -81,6 +82,7 @@ export class MediaTimecodeField extends HTMLElement {
 
   #input: HTMLInputElement;
   #editing = false;
+  #htmlMedia: HTMLMediaElement | null = null;
   #mediaController: { associateElement?(el: Element): void; unassociateElement?(el: Element): void } | null =
     null;
 
@@ -132,6 +134,7 @@ export class MediaTimecodeField extends HTMLElement {
     this.#input.addEventListener('blur', this.#onBlur);
     this.#input.addEventListener('change', this.#onChange);
     this.#input.addEventListener('keydown', this.#onKeyDown);
+    this.#bindHtmlMedia();
     this.#syncFromMedia();
     this.#associateController();
   }
@@ -141,12 +144,18 @@ export class MediaTimecodeField extends HTMLElement {
     this.#input.removeEventListener('blur', this.#onBlur);
     this.#input.removeEventListener('change', this.#onChange);
     this.#input.removeEventListener('keydown', this.#onKeyDown);
+    this.#unbindHtmlMedia();
     this.#mediaController?.unassociateElement?.(this);
     this.#mediaController = null;
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
+
+    if (name === 'media') {
+      if (this.isConnected) this.#bindHtmlMedia();
+      return;
+    }
 
     if (name === 'mediacontroller') {
       this.#mediaController?.unassociateElement?.(this);
@@ -172,14 +181,53 @@ export class MediaTimecodeField extends HTMLElement {
     this.#mediaController?.associateElement?.(this);
   }
 
+  #resolveHtmlMedia(): HTMLMediaElement | null {
+    const id = this.getAttribute('media');
+    if (!id) return null;
+    const root = this.getRootNode() as Document | ShadowRoot;
+    const el = root.getElementById?.(id);
+    return el instanceof HTMLMediaElement ? el : null;
+  }
+
+  #onHtmlTimeUpdate = (): void => {
+    if (!this.#editing) this.#syncFromMedia();
+  };
+
+  #bindHtmlMedia(): void {
+    this.#unbindHtmlMedia();
+    this.#htmlMedia = this.#resolveHtmlMedia();
+    this.#htmlMedia?.addEventListener('timeupdate', this.#onHtmlTimeUpdate);
+    this.#htmlMedia?.addEventListener('loadedmetadata', this.#onHtmlTimeUpdate);
+    this.#syncFromMedia();
+  }
+
+  #unbindHtmlMedia(): void {
+    this.#htmlMedia?.removeEventListener('timeupdate', this.#onHtmlTimeUpdate);
+    this.#htmlMedia?.removeEventListener('loadedmetadata', this.#onHtmlTimeUpdate);
+    this.#htmlMedia = null;
+  }
+
+  #playhead(): number {
+    const chrome = this.mediaCurrentTime;
+    if (Number.isFinite(chrome)) return chrome;
+    return this.#htmlMedia?.currentTime ?? 0;
+  }
+
+  #duration(): number {
+    const chrome = this.mediaDuration;
+    if (Number.isFinite(chrome) && chrome > 0) return chrome;
+    const d = this.#htmlMedia?.duration;
+    return d != null && Number.isFinite(d) ? d : NaN;
+  }
+
   #displayFormat(): Exclude<TimecodeFormat, 'auto'> {
-    return resolveFormat(this.format, this.mediaDuration);
+    return resolveFormat(this.format, this.#duration());
   }
 
   #syncFromMedia(): void {
     const fmt = this.#displayFormat();
     this.toggleAttribute('data-hours', fmt === 'hh:mm:ss');
-    const t = Number.isFinite(this.mediaCurrentTime) ? this.mediaCurrentTime : 0;
+    const t = this.#playhead();
     this.#input.value = formatTimecode(t, fmt);
     this.removeAttribute('invalid');
     this.#input.removeAttribute('aria-invalid');
@@ -222,9 +270,9 @@ export class MediaTimecodeField extends HTMLElement {
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       e.preventDefault();
       const parsed = parseTimecode(this.#input.value);
-      const base = parsed ?? (Number.isFinite(this.mediaCurrentTime) ? this.mediaCurrentTime : 0);
+      const base = parsed ?? this.#playhead();
       const delta = (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 10 : 1);
-      const next = clampTime(base + delta, this.mediaDuration);
+      const next = clampTime(base + delta, this.#duration());
       this.#input.value = formatTimecode(next, this.#displayFormat());
       this.removeAttribute('invalid');
     }
@@ -241,7 +289,8 @@ export class MediaTimecodeField extends HTMLElement {
       return;
     }
 
-    const time = clampTime(parsed, this.mediaDuration);
+    const time = clampTime(parsed, this.#duration());
+    if (this.#htmlMedia) this.#htmlMedia.currentTime = time;
     this.dispatchEvent(
       new CustomEvent(MEDIA_SEEK_REQUEST, {
         bubbles: true,

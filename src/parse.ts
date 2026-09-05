@@ -48,3 +48,12 @@ export function clampTime(seconds: number, duration: number): number {
   const max = Number.isFinite(duration) && duration > 0 ? duration : Infinity;
   return Math.min(max, Math.max(min, t));
 }
+
+/** Parse and seek any HTML5 video/audio. Returns seconds, or null if the string is not a time. */
+export function seekMedia(media: HTMLMediaElement, input: string): number | null {
+  const parsed = parseTimecode(input);
+  if (parsed == null) return null;
+  const time = clampTime(parsed, media.duration);
+  media.currentTime = time;
+  return time;
+}

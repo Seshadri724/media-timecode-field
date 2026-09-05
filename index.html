@@ -57,16 +57,14 @@
     <main>
       <h1>media-timecode-field</h1>
       <p>
-        Click the time, type <kbd>1:17</kbd> or <kbd>90</kbd>, press Enter.
-        The bar is still a slider. This field is for when you already know where to go.
+        NASA ScienceCast on black holes (~4 min, public domain). Notes would say
+        “see <kbd>1:17</kbd>.” Type that, press Enter — don’t hunt the slider.
       </p>
       <media-controller>
         <video
           slot="media"
-          src="https://stream.mux.com/A3VXy02VoUinw01pwyomEO3bHnG4P32xzV7u1j1FSzjNg/high.mp4"
+          src="https://images-assets.nasa.gov/video/301_BlackHoles/301_BlackHoles~medium.mp4"
           playsinline
-          muted
-          crossorigin="anonymous"
         ></video>
         <media-control-bar>
           <media-play-button></media-play-button>
@@ -82,6 +80,23 @@
       <p class="hint">
         <kbd>Enter</kbd> seek · <kbd>Esc</kbd> cancel · <kbd>↑</kbd><kbd>↓</kbd> ±1s ·
         Shift+arrows ±10s
+        ·
+        <a href="https://images.nasa.gov/details/301_BlackHoles" style="color: inherit">NASA ScienceCasts: Shedding Light on Black Holes</a>
+      </p>
+
+      <h1 style="margin-top: 48px">Same field, plain HTML5 video</h1>
+      <p>
+        No Media Chrome. Point <kbd>media</kbd> at any <kbd>&lt;video&gt;</kbd> or <kbd>&lt;audio&gt;</kbd> you own.
+      </p>
+      <video
+        id="plain-video"
+        src="https://images-assets.nasa.gov/video/301_BlackHoles/301_BlackHoles~medium.mp4"
+        controls
+        playsinline
+        style="width: 100%; background: #000"
+      ></video>
+      <p class="hint" style="margin-top: 8px">
+        <media-timecode-field media="plain-video"></media-timecode-field>
       </p>
     </main>
     <script type="module" src="/demo/src/main.ts"></script>

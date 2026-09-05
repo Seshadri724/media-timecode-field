@@ -2,9 +2,26 @@
 
 Type a time. The video goes there.
 
-A Media Chrome control: `<media-timecode-field>` sits next to `<media-time-display>` (a label) and `<media-time-range>` (a slider). This one is an accessible text field that seeks.
+Works on **any HTML5 `<video>` or `<audio>` you control**, and as a Media Chrome control. It does not inject into Coursera, YouTube, or other people’s players.
 
-**Live demo** (after GitHub Pages deploys): type `1:17` and press Enter — https://seshadri724.github.io/media-timecode-field/
+**Live demo:** type `1:17` and press Enter — https://seshadri724.github.io/media-timecode-field/
+
+## HTML5 (no framework)
+
+```html
+<video id="v" src="video.mp4" controls></video>
+<media-timecode-field media="v"></media-timecode-field>
+<script type="module" src="media-timecode-field.js"></script>
+```
+
+Or one function, any player API that exposes `currentTime` / `duration`:
+
+```js
+import { seekMedia } from 'media-timecode-field';
+seekMedia(document.querySelector('video'), '1:17');
+```
+
+## Media Chrome
 
 ```html
 <media-controller>
@@ -13,7 +30,6 @@ A Media Chrome control: `<media-timecode-field>` sits next to `<media-time-displ
     <media-play-button></media-play-button>
     <media-timecode-field></media-timecode-field>
     <media-time-range></media-time-range>
-    <media-mute-button></media-mute-button>
   </media-control-bar>
 </media-controller>
 ```
@@ -25,9 +41,7 @@ import 'media-timecode-field';
 
 ## Why this exists
 
-The slider is a map. It is the wrong tool when you already know `1:17:42`. This element accepts `90`, `1:30`, or `01:02:45`, clamps to duration, and dispatches Media Chrome’s `mediaseekrequest`. Nested in `<media-controller>`, or set `mediacontroller="id"` if it lives outside.
-
-Works on any player that can seek to a time in seconds **and** embeds this control. It does not inject into Coursera, YouTube, or other sites’ chrome.
+The slider is a map. It is the wrong tool when you already know `1:17:42`. This accepts `90`, `1:30`, or `01:02:45`, clamps to duration, then seeks.
 
 ## Keyboard
 
@@ -38,25 +52,18 @@ Works on any player that can seek to a time in seconds **and** embeds this contr
 | Escape | Cancel |
 | ↑ / ↓ | ±1 second (Shift: ±10) |
 
-Typing does not leak into Media Chrome’s player shortcuts.
-
 ## Attributes
 
 | Attribute | Default | Meaning |
 | --- | --- | --- |
-| `format` | `auto` | `auto` → `hh:mm:ss` if duration ≥ 1 hour, else `mm:ss`. Or force `mm:ss` / `hh:mm:ss`. |
+| `media` | — | `id` of a `<video>` or `<audio>` (HTML5 path) |
+| `format` | `auto` | `auto` → `hh:mm:ss` if duration ≥ 1 hour, else `mm:ss` |
 | `disabled` | off | Not editable |
-| `mediacontroller` | — | Controller `id` when the field is not nested |
-
-Media Chrome writes `mediacurrenttime`, `mediaduration`, `mediaseekable` when the field is a state receiver (it observes those attributes).
-
-## CSS
-
-Uses Media Chrome tokens (`--media-font`, `--media-control-background`, `--media-focus-box-shadow`, …). Width: `--media-timecode-field-width`.
+| `mediacontroller` | — | Media Chrome controller `id` when the field is not nested |
 
 ## Not this
 
-Not frame-accurate SMPTE. HTML5 `currentTime` is seconds. Not a timeline framework. Not a review tool.
+Not Coursera/YouTube overlays. Not SMPTE frames. Not a new player.
 
 ## Develop
 
@@ -66,4 +73,4 @@ npm test
 npm run dev
 ```
 
-GitHub Pages builds from `npm run build` (`dist/`) on push to `main`. See [PRD.md](./PRD.md).
+See [PRD.md](./PRD.md).

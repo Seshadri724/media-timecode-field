@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clampTime, formatTimecode, parseTimecode, resolveFormat } from '../src/parse.ts';
+import { clampTime, formatTimecode, parseTimecode, resolveFormat, seekMedia } from '../src/parse.ts';
 
 describe('parseTimecode', () => {
   it('parses seconds, mm:ss, and hh:mm:ss', () => {
@@ -36,5 +36,14 @@ describe('resolveFormat / clampTime', () => {
     expect(clampTime(-4, 100)).toBe(0);
     expect(clampTime(140, 100)).toBe(100);
     expect(clampTime(50, NaN)).toBe(50);
+  });
+});
+
+describe('seekMedia', () => {
+  it('sets currentTime on any HTMLMediaElement-like object', () => {
+    const media = { currentTime: 0, duration: 200 } as HTMLMediaElement;
+    expect(seekMedia(media, '1:17')).toBe(77);
+    expect(media.currentTime).toBe(77);
+    expect(seekMedia(media, 'nope')).toBeNull();
   });
 });

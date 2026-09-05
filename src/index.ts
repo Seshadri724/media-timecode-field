@@ -4,5 +4,6 @@ export {
   formatTimecode,
   parseTimecode,
   resolveFormat,
+  seekMedia,
   type TimecodeFormat,
 } from './parse.js';
